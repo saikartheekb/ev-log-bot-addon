@@ -16,7 +16,7 @@ def get_ride_details(scooter_id, api_token, limit=None, sort_order="asc"):
     if limit is not None:
         url += f"&limit={limit}"
     headers = {"Authorization": f"Bearer {api_token}"}
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=10)
     if response.status_code == 200:
         return response.json()
     else:
@@ -30,7 +30,7 @@ def update_ghseet_data(rides):
         return
 
     get_id_url = f"{webhook_url}?getids=true"
-    get_id_response = requests.get(get_id_url)
+    get_id_response = requests.get(get_id_url, timeout=10)
     ids_from_sheet = get_id_response.json()
     ids_from_sheet_set = set(ids_from_sheet)
 
@@ -56,7 +56,7 @@ def update_ghseet_data(rides):
         params = {"rideData": encoded_data, "telegramAlert": str(telegram_alert).lower()}
 
         try:
-            response = requests.post(webhook_url, json=params)
+            response = requests.post(webhook_url, json=params, timeout=10)
             response.raise_for_status()
             print(f"Response from Google Apps Script for ride ID {ride['id']} {response.text}")
         except requests.exceptions.RequestException as e:
