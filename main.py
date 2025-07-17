@@ -15,7 +15,7 @@ webhook_url = os.getenv("webhook_url")
 def get_scooter_details(scooter_id, api_token, limit=None, sort_order="asc"):
     url = f"https://cerberus.ather.io/api/v1/triplogs?scooter={scooter_id}&sort=start_time_tz%20{sort_order}"
     headers = {"Authorization": f"Bearer {api_token}"}
-    response = requests.get(url, headers=headers, timeout=10)
+    response = requests.get(url, headers=headers)
     if response.status_code == 200:
         result = response.json()
         display_id = result[0]["scooter"]["display_id"][2:]
@@ -43,7 +43,7 @@ def update_ghseet_data(rides):
         return
 
     get_id_url = f"{webhook_url}?getids=true"
-    get_id_response = requests.get(get_id_url, timeout=10)
+    get_id_response = requests.get(get_id_url)
     ids_from_sheet = get_id_response.json()
     ids_from_sheet_set = set(ids_from_sheet)
 
@@ -77,7 +77,7 @@ def update_ghseet_data(rides):
         params = {"rideData": encoded_data, "telegramAlert": str(telegram_alert).lower()}
 
         try:
-            response = requests.post(webhook_url, json=params, timeout=10)
+            response = requests.post(webhook_url, json=params)
             response.raise_for_status()
             print(f"Response from Google Apps Script for ride ID {ride['ride_id']} {response.text}")
         except requests.exceptions.RequestException as e:
@@ -87,5 +87,5 @@ def update_ghseet_data(rides):
 scooter_display_id = get_scooter_details(scooter_id, api_token, 1, "desc")
 # get this scooter_display_id once and store it for future use
 # print(f"Scooter Display ID: {scooter_display_id}")
-ride_data = get_ride_details(scooter_display_id, api_token, 2000, "desc")
+ride_data = get_ride_details(scooter_display_id, api_token, 20, "desc")
 update_ghseet_data(ride_data)
